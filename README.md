@@ -1,6 +1,8 @@
 # raspi_to_stellarium
 
-Sends the ra/dec position of a telescope (wired gpio) to stellarium by usage of raspberrypi/wifi
+Sends the ra/dec position of a telescope (wired gpio) to stellarium (on a PC)
+
+by usage of raspberrypi/wifi
 
 1. First steps:
 
@@ -28,17 +30,19 @@ Sends the ra/dec position of a telescope (wired gpio) to stellarium by usage of 
 
    sh start_telescope.sh
 
-3. Stop the server or dummy server
+3. Start stellarium and configure telescope plugin
+
+   for dummy server on local host port 10000
+
+   for raspberrypi on remote host port 10000
+
+
+4. Stop the server or dummy server
 
    start second xterm session, go to the raspi_to_stellarium/scripts directory and do:
 
    sh stop_telescope.sh
 
-4. Start stellarium and configure telescope plugin
-
-   for dummy server on local host port 10000
-
-   for raspberrypi remote on port 10000
 
 
    
