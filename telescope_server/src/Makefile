@@ -101,7 +101,7 @@ depend:
 	sed -e 's/\.o/\.obj/g' make.dep > make.cross_dep
 
 clean:
-	rm *.o *.obj
+	rm *.o
 
 make.dep:
 	touch make.dep
