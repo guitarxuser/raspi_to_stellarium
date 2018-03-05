@@ -4,7 +4,17 @@ Sends the ra/dec position of a telescope (wired gpio) to stellarium (on a PC)
 
 by usage of raspberrypi/wifi
 
-1. First steps:
+Prerequisites:
+
+   install wiringPi:
+
+   git clone git://git.drogon.net/wiringPi
+
+   cd wiringPi
+
+   ./build
+   
+1. Build, install, uninstall 
 
    to build the executables please do:
    
@@ -39,7 +49,7 @@ by usage of raspberrypi/wifi
 
 4. Stop the server or dummy server
 
-   start second xterm session, go to the raspi_to_stellarium/scripts directory and do:
+   start second xterm session, go to the raspi_to_stellarium/scripts and do:
 
    sh stop_telescope.sh
 
