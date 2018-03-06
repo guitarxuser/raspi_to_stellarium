@@ -26,7 +26,7 @@
 #define  RoSPin    2 
 #define  high  1
 #define  low   0
-#define  MAX_NUMBER 4294967296 /*maximal RA 0 2^32*/
+#define  MAX_NUMBER 4294967296 /*maximal RA  2^32*/
 #define  REVOL_STEPS_COUNT 24  /*encoder steps for 360 degree revolution*/
 static volatile int globalCounter = 0 ;
 
@@ -36,9 +36,9 @@ unsigned char Last_RoA_Status;
 unsigned char Current_RoB_Status;
 unsigned char Current_RoA_Status;
 int fd;                    /* Filedeskriptor */
-  struct timeval t1, t2;
-  long long t;
- unsigned long microseconds = 5000;
+struct timeval t1, t2;
+long long t;
+unsigned long microseconds = 5000;
 
 /*local functions*/
 
@@ -133,46 +133,6 @@ void rotaryDeal(void)
 }
 
 
-
-void rotaryDeal_dummy(void)
-{
-
-	char  telsscope_telegram [18]; /*8char;8char#*/
-	char* t_tele_p;
-	float ra_to_send=0;
-
-	t_tele_p=telsscope_telegram;
-
-
-
-		ra_to_send=((float)globalCounter/(float)48)*MAX_NUMBER;
-
-		fprintf(stderr, "globalCounter=%d\n",globalCounter);
-		/* sprintf(t_tele_p,"%s","64AB0500,40CE0500#");*/
-		/*fprintf(stderr,"%X,%s#\n",(int)ra_to_send,"40CE0500");
-         sprintf(t_tele_p,"%X,%s#",(int)ra_to_send,"40CE0500");*/
-		if(ra_to_send ==0)
-		{
-			fprintf(stderr,"%s,%s#\n","00000000","20670280");
-		    sprintf(t_tele_p,"%s,%s#","00000000","20670280");
-		}
-		else
-		{
-		fprintf(stderr,"%X,%s#\n",(unsigned int)ra_to_send,"20670280");
-		sprintf(t_tele_p,"%X,%s#",(unsigned int)ra_to_send,"20670280");
-		}
-		sleep(1);
-		sendbytes(t_tele_p, strlen(t_tele_p));
-		globalCounter = globalCounter + 1;
-
-		 if (globalCounter == 48)
-			{
-				globalCounter=0;
-				sleep(1);
-			}
-
-}
-
 void rotaryClear(void)
 {
 	if(digitalRead(RoSPin) == 0)
@@ -242,51 +202,51 @@ int my_delay(unsigned long mikros)
 int open_serial(char *device)
   {
   /*
-   * Oeffnet seriellen Port
-   * Gibt das Filehandle zurueck oder -1 bei Fehler
+   * opens serial port
    *
    * RS232-Parameter:
-   * 19200 bps, 8 Datenbits, 1 Stoppbit, no parity, no handshake
+   * 9600 bps, 8 data, 1 stopbit, no parity, no handshake
    */
 
-   /*int fd;*/                    /* Filedeskriptor */
-   struct termios options;    /* Schnittstellenoptionen */
+   /*int fd;*/                    
+   struct termios options;    
 
-   /* Port oeffnen - read/write, kein "controlling tty", Status von DCD ignorieren */
+   /* open port - read/write, no "controlling tty", ignore status von DCD  */
    fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
    if (fd >= 0)
      {
      /* get the current options */
      fcntl(fd, F_SETFL, 0);
      if (tcgetattr(fd, &options) != 0) return(-1);
-     memset(&options, 0, sizeof(options)); /* Structur loeschen, ggf. vorher sichern
-                                          und bei Programmende wieder restaurieren */
-     /* Baudrate setzen */
+     memset(&options, 0, sizeof(options)); 
+
+     /* set baudrate */
      cfsetispeed(&options, B9600);
      cfsetospeed(&options, B9600);
 
      /* setze Optionen */
-     options.c_cflag &= ~PARENB;         /* kein Paritybit */
-     options.c_cflag &= ~CSTOPB;         /* 1 Stoppbit */
-     options.c_cflag &= ~CSIZE;          /* 8 Datenbits */
+     options.c_cflag &= ~PARENB;         /* no parity */
+     options.c_cflag &= ~CSTOPB;         /* 1 stopbit */
+     options.c_cflag &= ~CSIZE;          /* 8 databits */
      options.c_cflag |= CS8;
 
-     /* 9600 bps, 8 Datenbits, CD-Signal ignorieren, Lesen erlauben */
+     /* 9600 bps, 8 data, ignore CD-Signal , allow read */
      options.c_cflag |= (CLOCAL | CREAD);
 
-     /* Kein Echo, keine Steuerzeichen, keine Interrupts */
+     /* no echo, no control character, no interrupts */
      options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-     options.c_iflag = IGNPAR;           /* Parity-Fehler ignorieren */
-     options.c_oflag &= ~OPOST;          /* setze "raw" Input */
-     options.c_cc[VMIN]  = 0;            /* warten auf min. 0 Zeichen */
-     options.c_cc[VTIME] = 10;           /* Timeout 1 Sekunde */
-     tcflush(fd,TCIOFLUSH);              /* Puffer leeren */
+     options.c_iflag = IGNPAR;           /* ignore parity error */
+     options.c_oflag &= ~OPOST;          /* set "raw" input */
+     options.c_cc[VMIN]  = 0;            /* wait for min. 0 characters */
+     options.c_cc[VTIME] = 10;           /* timeout 1 sec */
+     tcflush(fd,TCIOFLUSH);              /* empty buffer */
      if (tcsetattr(fd, TCSAFLUSH, &options) != 0) return(-1);
 
      }
        
   return(fd);
   }
+
 
 int sendbytes(char * Buffer, int Count)
 /* Sendet Count Bytes aus dem Puffer Buffer */
