@@ -83,7 +83,7 @@ void rotaryDeal_ra(void)
 
 		ra_to_send=((float)globalCounter/(float)REVOL_STEPS_COUNT)*MAX_NUMBER;
 
-		fprintf(stderr, "globalCounter=%d\n",globalCounter);
+		fprintf(stderr, "globalCounter ra =%d\n",globalCounter);
 		/* sprintf(t_tele_p,"%s","64AB0500,40CE0500#");*/
 		/*fprintf(stderr,"%X,%s#\n",(int)ra_to_send,"40CE0500");
                 sprintf(t_tele_p,"%X,%s#",(int)ra_to_send,"40CE0500");*/
@@ -114,7 +114,7 @@ void rotaryDeal_ra(void)
 void rotaryDeal_dec(void)
 {
 
-	char  telsscope_telegram [18]; /*8char;8char#*/
+//	char  telsscope_telegram [18]; /*8char;8char#*/
 //	char* t_tele_p;
 	float dec_to_send=0;
 
@@ -123,7 +123,14 @@ void rotaryDeal_dec(void)
 
 
 		dec_to_send=((float)globalCounter/(float)REVOL_STEPS_COUNT)*MAX_NUMBER;
+		//fprintf(stderr, "globalCounter dec =%d\n",globalCounter);
 		map_addr->dec= (unsigned int)dec_to_send;
-
+		globalCounter = globalCounter + 1;
+		sleep(1);
+		 if (globalCounter ==  REVOL_STEPS_COUNT)
+			{
+				globalCounter=0;
+				sleep(1);
+			}
 
 }
