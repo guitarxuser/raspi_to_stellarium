@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <fcntl.h>
+#include <sys/mman.h>
 #include <errno.h>
 #include <termios.h>
 #include <math.h>
@@ -17,22 +18,37 @@
 #define  RoAPin    0 /* gpio pin 11*/
 #define  RoBPin    1 /* gpio pin 12 outside*/
 #define  RoSPin    2
+#define  RoCPin    3 /* gpio pin 15*/
+#define  RoDPin    4 /* gpio pin 16 outside*/
 #define  high  1
 #define  low   0
 #define  MAX_NUMBER 4294967296 /*maximal RA  2^32*/
 #define  REVOL_STEPS_COUNT 24  /*encoder steps for 360 degree revolution*/
 #define gpio_MAXBUF 100
+#define	SIZE		sizeof(long)	/* size of shared memory area */
 static volatile int globalCounter = 0 ;
-
-unsigned char flag=high;
+static volatile int globalCounter_dec = 0;
+static unsigned char flag_ra=high;
+static unsigned char flag_dec=high;
 unsigned char Last_RoB_Status;
 unsigned char Last_RoA_Status;
+unsigned char Last_RoD_Status;
+unsigned char Last_RoC_Status;
 unsigned char Current_RoB_Status;
 unsigned char Current_RoA_Status;
+unsigned char Current_RoD_Status;
+unsigned char Current_RoC_Status;
 int fd;
 struct timeval t1, t2;
 long long t;
 unsigned long microseconds = 5000;
+
+typedef struct{
+	unsigned int ra;
+	unsigned int dec;
+}mmap_typ;
+
+mmap_typ *map_addr;
 
 /*local functions*/
 
@@ -40,10 +56,12 @@ int my_delay(unsigned long mikros);
 int open_serial(char *);
 int sendbytes(char * Buffer, int Count);
 void send_calc_ra(int);
-void rotaryDeal(void);
+void send_calc_dec(int);
 void rotaryClear(void);
-
-
+void rotaryDeal_ra(void);
+void rotaryDeal_dec(void);
+//static volatile float ra_to_send = 0;
+//static volatile float dec_to_send = 0;
 
 
 /***********************  main  *******************************/
@@ -51,7 +69,10 @@ void rotaryClear(void);
 int main(int argc, char* argv[])
 {
 
-	char* device=argv[1];
+	 char* device=argv[1];
+	 int	fd_zero;
+     pid_t	pid;
+	 void	*area;
 
 	if (argc <2)
 	{
@@ -72,20 +93,50 @@ int main(int argc, char* argv[])
 
 	pinMode(RoAPin, INPUT);
 	pinMode(RoBPin, INPUT);
-	/*		pinMode(RoSPin, INPUT);
+	pinMode(RoCPin, INPUT);
+	pinMode(RoDPin, INPUT);
 
-		pullUpDnControl(RoSPin, PUD_UP);*/
 	pullUpDnControl(RoAPin, PUD_UP);
 	pullUpDnControl(RoBPin, PUD_UP);
-	while(1){
+	pullUpDnControl(RoCPin, PUD_UP);
+	pullUpDnControl(RoDPin, PUD_UP);
 
-		/*		rotaryDeal_dummy();*/
+	/* parent chile game*/
 
-		rotaryDeal();
+	if ((fd_zero = open("/dev/zero", O_RDWR)) < 0)
+		  fprintf(stderr,"open error\n");
+		if ((area = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED,
+		  fd_zero, 0)) == MAP_FAILED)
+		  fprintf(stderr,"mmap error\n");
 
-		/*   	rotaryClear();*/
-	}
-	close(fd);
+		map_addr=(mmap_typ*)area; /*shared memory parent and child */
+
+		close(fd_zero);		/* can close /dev/zero now that it's mapped */
+
+
+		if ((pid = fork()) < 0) {
+			fprintf(stderr,"fork error\n");
+		} else if (pid > 0) {			/* parent */
+
+
+			fprintf(stderr,"I am parent\n");
+
+			while(1){
+
+				rotaryDeal_ra(); /*dummy simulation of rotatory encoder*/
+
+			}
+		}
+		else {						/* child */
+			fprintf(stderr,"I am child\n");
+
+			while(1){
+
+				rotaryDeal_dec(); /*dummy simulation of rotatory encoder*/
+
+			}
+		}
+
 	return 0;
 }
 
@@ -103,7 +154,7 @@ void rotaryClear(void)
 }
 
 
-void rotaryDeal(void)
+void rotaryDeal_ra(void)
 {
 
 	Last_RoB_Status = digitalRead(RoBPin);
@@ -112,14 +163,14 @@ void rotaryDeal(void)
 	while(digitalRead(RoAPin)){
 		my_delay(microseconds);
 		Current_RoB_Status = digitalRead(RoBPin);
-		flag = 1;
+		flag_ra = 1;
 	}
 
 
-	if(flag == 1){
-		flag = 0;
+	if(flag_ra == 1){
+		flag_ra = 0;
 		if((Last_RoB_Status == 1)&&(Current_RoB_Status == 0) ){
-			globalCounter = globalCounter + 1;
+			globalCounter = globalCounter - 1;
 			/*
 	printf("clockw Last_RoB_Status : %d\n",Last_RoB_Status);
 	printf("clockw Current_RoB_Status : %d\n",Current_RoB_Status);
@@ -136,7 +187,7 @@ void rotaryDeal(void)
 
 		if((Last_RoB_Status == 0)&&(Current_RoB_Status == 1)){
 
-			globalCounter = globalCounter - 1 ;
+			globalCounter = globalCounter + 1 ;
 			/*
 	printf("anti Last_RoB_Status : %d\n",Last_RoB_Status);
 	printf("anti Current_RoB_Status : %d\n",Current_RoB_Status);
@@ -145,11 +196,61 @@ void rotaryDeal(void)
 			 */
 			printf("globalCounter : %d\n",globalCounter);
 
-			send_calc_ra(globalCounter);
 		}
+
+			send_calc_ra(globalCounter);
 	}
 }
 
+void rotaryDeal_dec(void)
+{
+
+
+	Last_RoD_Status = digitalRead(RoDPin);
+	Last_RoC_Status = digitalRead(RoCPin);
+
+	while(digitalRead(RoCPin)){
+		my_delay(microseconds);
+		Current_RoD_Status = digitalRead(RoDPin);
+		flag_dec = 1;
+		//my_delay(500);
+		break;
+	}
+
+	if(flag_dec == 1){
+		flag_dec = 0;
+		if((Last_RoD_Status == 1)&&(Current_RoD_Status == 0) ){
+			globalCounter_dec = globalCounter_dec - 1;
+			/*
+	printf("clockw Last_RoB_Status : %d\n",Last_RoB_Status);
+	printf("clockw Current_RoB_Status : %d\n",Current_RoB_Status);
+	printf("clockw Last_RoA_Status : %d\n",Last_RoA_Status);
+	printf("clockw Current_RoA_Status : %d\n",Current_RoA_Status);
+			 */
+			printf("globalCounter_dec : %d\n",globalCounter_dec);
+		}
+		if(Last_RoD_Status == 0 ){
+			my_delay(500);
+			Current_RoD_Status = digitalRead(RoDPin);
+		}
+
+		if((Last_RoD_Status == 0)&&(Current_RoD_Status == 1)){
+
+			globalCounter_dec = globalCounter_dec + 1 ;
+			/*
+	printf("anti Last_RoB_Status : %d\n",Last_RoB_Status);
+	printf("anti Current_RoB_Status : %d\n",Current_RoB_Status);
+	printf("anti Last_RoA_Status : %d\n",Last_RoA_Status);
+	printf("anti Current_RoA_Status : %d\n",Current_RoA_Status);
+			 */
+			printf("globalCounter_dec : %d\n",globalCounter_dec);
+
+
+		}
+	    send_calc_dec(globalCounter_dec);
+	}
+
+}
 
 
 int my_delay(unsigned long mikros)
@@ -256,76 +357,45 @@ void send_calc_ra(int received_globalCounter)
 	fprintf(stderr, "received_globalCounter=%d\n",received_globalCounter);
 	fprintf(stderr, "internal_counter=%d\n",internal_counter);
 	fprintf(stderr, "revol_count=%d\n",revol_count);
-	if(ra_to_send != 0)
-	{
-		fprintf(stderr,"%X,%s#\n",(unsigned int)ra_to_send,"20670280");
-		sprintf(t_tele_p,"%X,%s#",(unsigned int)ra_to_send,"20670280");
-	}
-	if(ra_to_send == 0)
-	{
-		fprintf(stderr,"%s,%s#\n","00000000","20670280");
-		sprintf(t_tele_p,"%s,%s#","00000000","20670280");
-	}
+        map_addr->ra=(unsigned int)ra_to_send;
+
+		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
+		sprintf(t_tele_p,"%X,%X#", map_addr->ra ,map_addr->dec);
+
 	sendbytes(t_tele_p, strlen(t_tele_p));
 }
-/* Waiting for an edge at GPIO-pin.
- * arguments: pin: GPIO-pin
- *               timeout: in miliseconds
- * pin must be prepared (export,
- * direction, edge)
- * return values: <0: error, 0: poll() timeout,
- * 1: edge determined, pin returns "0"
- * 2: edge determined, pin returns "1"
- */
-int gpio_wait(unsigned int pin, int timeout)
-  {
-  char path[gpio_MAXBUF];
-  int fd;
-  struct pollfd polldat[1];
-  char buf[gpio_MAXBUF];
-  int rc;
 
-  /* GPIO-pin opened */
-  snprintf(path, gpio_MAXBUF, "/sys/class/gpio/gpio%d/value", pin);
-  fd = open(path, O_RDONLY | O_NONBLOCK );
-  if (fd < 0)
-    {
-    perror("gpio_wait: could not read from GPIO  (open)!\n");
-    return(-1);
-    }
+void send_calc_dec(int received_globalCounter)
+{
+	char  telsscope_telegram [18]; /*8char;8char#*/
+	char* t_tele_p;
+	float dec_to_send=0;
+	int internal_counter;
+	int revol_count=1;
 
-  memset((void*)buf, 0, sizeof(buf));
-  memset((void*)polldat, 0, sizeof(polldat));
-  polldat[0].fd = fd;
-  polldat[0].events = POLLPRI;
-  /* clear interrupts */
-  lseek(fd, 0, SEEK_SET);
-  rc = read(fd, buf, gpio_MAXBUF - 1);
+	t_tele_p=telsscope_telegram;
+	internal_counter=received_globalCounter;
 
-  rc = poll(polldat, 1, timeout);
-  if (rc < 0)
-    { /* poll() failed! */
-    perror("gpio_wait: poll error\n");
-    close(fd);
-    return(-1);
-    }
-  if (rc == 0)
-    { /* poll() timeout! */
-    close(fd);
-    return(0);
-    }
-  if (polldat[0].revents & POLLPRI)
-    {
-    if (rc < 0)
-      { /* read() failed! */
-      perror("gpio_wait: could not read from GPIO (read)!\n");
-      close(fd);
-      return(-2);
-      }
-    /* printf("poll() GPIO %d interrupt occurred: %s\n", pin, buf); */
-    close(fd);
-    return(1 + atoi(buf));
-    }
-  close(fd);
-  return(-1);
-  }
+	revol_count= abs((int)(floor((float)received_globalCounter/REVOL_STEPS_COUNT)));
+
+	if(received_globalCounter >= 24)
+	{
+		internal_counter=received_globalCounter - REVOL_STEPS_COUNT*revol_count;
+	}
+
+	if(received_globalCounter < 0)
+	{
+		internal_counter=received_globalCounter + REVOL_STEPS_COUNT*revol_count ;
+	}
+	dec_to_send=((float)internal_counter/(float)24)*MAX_NUMBER;
+		fprintf(stderr, "received_globalCounter=%d\n",received_globalCounter);
+	fprintf(stderr, "internal_counter=%d\n",internal_counter);
+	fprintf(stderr, "revol_count=%d\n",revol_count);
+        map_addr->dec=(unsigned int)dec_to_send;
+
+		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
+		sprintf(t_tele_p,"%X,%X#", map_addr->ra ,map_addr->dec);
+
+	sendbytes(t_tele_p, strlen(t_tele_p));
+}
+
