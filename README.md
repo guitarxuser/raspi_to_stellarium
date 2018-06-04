@@ -17,6 +17,12 @@ Prerequisites:
    cd wiringPi
 
    ./build
+
+   Download raspi_to_stellarium and go to the main directory:
+   
+   cd raspi_to_stellarium
+
+   To setup and execute do following steps:
    
 1. Build, install, uninstall 
 
