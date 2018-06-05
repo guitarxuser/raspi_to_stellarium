@@ -24,21 +24,18 @@ Prerequisites:
 
    To setup and execute do following steps:
    
-1. Build, install, uninstall 
+1. Build
 
    to build the executables please do:
    
    sh build.sh
    
-   to install:
+2. Install
    
    sudo sh install.sh
 
-   to unistall:
 
-   sudo sh uninstall.sh
-
-2. Run the server
+3. Run the server
 
    cd scripts
 
@@ -50,19 +47,22 @@ Prerequisites:
 
    sh start_telescope.sh
 
-3. Start Stellarium and configure telescope plugin
+4. Start Stellarium and configure telescope plugin
 
    for dummy server on local host port 10000
 
    for raspberrypi on remote host port 10000
 
 
-4. Stop the server or dummy server
+5. Stop the server or dummy server
 
    start second xterm session, go to the raspi_to_stellarium/scripts and do:
 
    sh stop_telescope.sh
 
+6. Unistall
+
+   sudo sh uninstall.sh
 
 
    
