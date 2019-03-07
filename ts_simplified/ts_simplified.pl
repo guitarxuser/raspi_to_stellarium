@@ -42,6 +42,9 @@ use IO::Socket;
 use constant MYPORT => 10000;
 my $sock = '';
 my $client = 0;
+my $REVOL_STEPS_COUNT=256;
+my $MAX_NUMBER=4294967296;
+my $globalCounter=0;
 
 $sock = new IO::Socket::INET(LocalPort => MYPORT,
 		             Reuse     => 1,
@@ -53,15 +56,40 @@ while ($client = $sock->accept())
   {
    print "Accepted connection from ",
    $client->peerhost(), ":", $client->peerport(), "\n";  
+   while (1) 
+   {
+#    sleep(1);
+    
+   #calculate ra
+   
+    my $ra_calc=($globalCounter/$REVOL_STEPS_COUNT)*$MAX_NUMBER;
+       $ra_calc= sprintf("%08d", $ra_calc);
+       print("counter is $globalCounter $ra_calc\n");
+    my $out_calc=ra_dec_time($ra_calc);   
+       chomp;
+       print $client $out_calc;
+       $globalCounter++;
+       if ($globalCounter==$REVOL_STEPS_COUNT)
+        {
+	 $globalCounter=0;
+        }   
+   }
+    $client->close() if defined $client;
+}   
+
+sub ra_dec_time()
+{
    my $length=24;
    my $type=0;
    my $time= time();
-   my $ra =0xBAAAAB00;
+#   my $ra =0xBAAAAB00;
+   my $ra_inp = shift(@_);
+   my $ra = $ra_inp;
    my $dec=0x20670280;
    my $status=0;
-  
-   my $out=pack("SSQlll",$length,$type,$time,$ra,$dec,$status);
-   my @out_unpacked=unpack('SSQlll',$out);
+
+   my $out=pack("SSQLll",$length,$type,$time,$ra,$dec,$status);
+   my @out_unpacked=unpack('SSQLll',$out);
    $length=$out_unpacked[0];
    $type=$out_unpacked[1];
    $time=$out_unpacked[2];
@@ -69,16 +97,7 @@ while ($client = $sock->accept())
    $dec=$out_unpacked[4];
    $status=$out_unpacked[5];
    my $out_unpacked=$length.$type.$time.$ra.$dec.$status;
-   print "$out_unpacked\n";  
-
-   while (1) 
-    {
-    chomp;
-    print $client $out;
-    print $client $out;
-    print $client $out;
-   
-    }
-  $client->close() if defined $client;
-  }
-
+   print("time=$time    ra=$ra    dec=$dec\n");
+   print "$out_unpacked\n";
+   return $out;     
+}
