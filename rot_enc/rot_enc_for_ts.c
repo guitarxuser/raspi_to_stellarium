@@ -72,12 +72,15 @@ int main(void)
 {
 
 	 int	fd_zero;
-         int i=0;
+         int    i=0;
          pid_t  pid;
 	 void	*area;
 
 
-
+        if(wiringPiSetup() < 0){
+		fprintf(stderr, "Unable to setup wiringPi:%s\n",strerror(errno));
+		return 1;
+	}
 	pinMode(RoAPin, INPUT);
 	pinMode(RoBPin, INPUT);
 	pinMode(RoCPin, INPUT);
