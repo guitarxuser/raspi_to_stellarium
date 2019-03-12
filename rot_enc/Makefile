@@ -11,13 +11,14 @@ LDLIBS_GPIO= -lgpio  -lrt
 ###############################################################################
 
 
-all: rot_enc rot_enc_dummy
+all: rot_enc rot_enc_dummy rot_enc_for_ts
 
 rot_enc:	rot_enc.o
 	$(CC) -o $@ rot_enc.o $(LDFLAGS) $(LDLIBS)
 rot_enc_dummy:	rot_enc_dummy.o
 	$(CC) -o $@ rot_enc_dummy.o $(LDFLAGS) $(LDLIBS)
-
+rot_enc_for_ts:	rot_enc_for_ts.o
+	$(CC) -o $@ rot_enc_for_ts.o $(LDFLAGS) $(LDLIBS)
 
 clean:
 	rm -f *.o
