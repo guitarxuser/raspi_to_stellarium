@@ -77,10 +77,10 @@ int main(void)
 	 void	*area;
 
 
-        if(wiringPiSetup() < 0){
+	 /*        if(wiringPiSetup() < 0){
 		fprintf(stderr, "Unable to setup wiringPi:%s\n",strerror(errno));
 		return 1;
-	}
+		}*/
 	pinMode(RoAPin, INPUT);
 	pinMode(RoBPin, INPUT);
 	pinMode(RoCPin, INPUT);
@@ -263,12 +263,12 @@ void rotaryDeal_polaris_ra(void)
 		fprintf(stderr, "globalCounter=%d\n",globalCounter);
 		if(ra_to_send ==0)
 		{
-		    fprintf(stderr,"%s,%s#\n","00000000","40000000");
+		    fprintf(stderr,"%s,%s\r\n","00000000","40000000");
 		    sprintf(t_tele_p,"%s,%s#","00000000","40000000");
 		}
 		else
 		{
-		  fprintf(stderr,"%X,%s#\n",(unsigned int)ra_to_send,"40000000");
+		  fprintf(stderr,"%X,%s\r\n",(unsigned int)ra_to_send,"40000000");
 		  sprintf(t_tele_p,"%X,%s#",(unsigned int)ra_to_send,"40000000");
 
 		}
@@ -328,7 +328,7 @@ void send_calc_ra(int received_globalCounter)
 	fprintf(stderr, "revol_count=%d\n",revol_count);
         map_addr->ra=(unsigned int)ra_to_send;
 
-		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
+		fprintf(stdout,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
 		sprintf(t_tele_p,"%X,%X#", map_addr->ra ,map_addr->dec);
 
 
@@ -362,7 +362,7 @@ void send_calc_dec(int received_globalCounter)
 	fprintf(stderr, "revol_count=%d\n",revol_count);
         map_addr->dec=(unsigned int)dec_to_send;
 
-		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
+		fprintf(stdout,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
 		sprintf(t_tele_p,"%X,%X#", map_addr->ra ,map_addr->dec);
 
 }
