@@ -55,12 +55,23 @@ print "Accepting connections on Port ", MYPORT, "...\n";
 while ($client = $sock->accept()) 
   {
    print "Accepted connection from ",
-   $client->peerhost(), ":", $client->peerport(), "\n";  
-   while (1) 
-   {
-#    sleep(1);
-    
-   #calculate ra
+   $client->peerhost(), ":", $client->peerport(), "\n";
+my   $cmd_line="rot_enc_for_ts";
+
+
+#print "cmd_line3 $cmd_line3 \n";
+
+open(IN,"$cmd_line|") or die "could not start $cmd_line: $!";
+
+
+
+foreach   my $line  (<IN>)
+{
+
+        print "telescope line $line\n";
+    			
+} 
+ 
    
     my $ra_calc=($globalCounter/$REVOL_STEPS_COUNT)*$MAX_NUMBER;
        $ra_calc= sprintf("%08d", $ra_calc);
@@ -73,7 +84,7 @@ while ($client = $sock->accept())
         {
 	 $globalCounter=0;
         }   
-   }
+   
     $client->close() if defined $client;
 }   
 
