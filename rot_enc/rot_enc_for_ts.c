@@ -53,8 +53,8 @@ mmap_typ *map_addr;
 /*local functions*/
 
 int my_delay(unsigned long mikros);
-
-
+int open_serial(char *);
+int sendbytes(char * Buffer, int Count);
 void send_calc_ra(int);
 void send_calc_dec(int);
 void rotaryClear(void);
@@ -68,19 +68,32 @@ void rotaryDeal_polaris_ra(void);
 
 /***********************  main  *******************************/
 
-int main(void)
+int main(int argc, char* argv[])
 {
 
+	 char* device=argv[1];
 	 int	fd_zero;
-         int    i=0;
+         int i=0;
          pid_t  pid;
 	 void	*area;
 
+	if (argc <2)
+	{
+		fprintf(stderr,"please call rot_enc_for_ts </dev/pts/number>\n");
+		return(-1);
+	}
 
-	 /*        if(wiringPiSetup() < 0){
+	if(open_serial(device) < 0 ) /*and fd within it*/
+	{
+		fprintf(stderr, "Unable to setup device:%s\n",strerror(errno));
+		return 1;
+	}
+
+	if(wiringPiSetup() < 0){
 		fprintf(stderr, "Unable to setup wiringPi:%s\n",strerror(errno));
 		return 1;
-		}*/
+	}
+
 	pinMode(RoAPin, INPUT);
 	pinMode(RoBPin, INPUT);
 	pinMode(RoCPin, INPUT);
@@ -264,16 +277,16 @@ void rotaryDeal_polaris_ra(void)
 		if(ra_to_send ==0)
 		{
 		    fprintf(stderr,"%s,%s\r\n","00000000","40000000");
-		    sprintf(t_tele_p,"%s,%s#","00000000","40000000");
+		    sprintf(t_tele_p,"%s,%s\r\n","00000000","40000000");
 		}
 		else
 		{
 		  fprintf(stderr,"%X,%s\r\n",(unsigned int)ra_to_send,"40000000");
-		  sprintf(t_tele_p,"%X,%s#",(unsigned int)ra_to_send,"40000000");
+		  sprintf(t_tele_p,"%X,%s\r\n",(unsigned int)ra_to_send,"40000000");
 
 		}
 		sleep(1);
-
+		sendbytes(t_tele_p, strlen(t_tele_p));
 		globalCounter = globalCounter + 1;
 
 		 if (globalCounter ==  REVOL_STEPS_COUNT)
@@ -296,9 +309,72 @@ int my_delay(unsigned long mikros)
   return(resp);
   }
 
+int open_serial(char *device)
+{
+	/*
+	 * opens serial port
+	 *
+	 * RS232-Parameter:
+	 * 9600 bps, 8 data, 1 stopbit, no parity, no handshake
+	 */
+
+	/*int fd;*/
+	struct termios options;
+
+	/* open port - read/write, no "controlling tty", ignore status von DCD  */
+	fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+	if (fd >= 0)
+	{
+		/* get the current options */
+		fcntl(fd, F_SETFL, 0);
+		if (tcgetattr(fd, &options) != 0) return(-1);
+		memset(&options, 0, sizeof(options));
+
+		/* set baudrate */
+		cfsetispeed(&options, B9600);
+		cfsetospeed(&options, B9600);
+
+		/* setze Optionen */
+		options.c_cflag &= ~PARENB;         /* no parity */
+		options.c_cflag &= ~CSTOPB;         /* 1 stopbit */
+		options.c_cflag &= ~CSIZE;          /* 8 databits */
+		options.c_cflag |= CS8;
+
+		/* 9600 bps, 8 data, ignore CD-Signal , allow read */
+		options.c_cflag |= (CLOCAL | CREAD);
+
+		/* no echo, no control character, no interrupts */
+		options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+		options.c_iflag = IGNPAR;           /* ignore parity error */
+		options.c_oflag &= ~OPOST;          /* set "raw" input */
+		options.c_cc[VMIN]  = 0;            /* wait for min. 0 characters */
+		options.c_cc[VTIME] = 10;           /* timeout 1 sec */
+		tcflush(fd,TCIOFLUSH);              /* empty buffer */
+		if (tcsetattr(fd, TCSAFLUSH, &options) != 0) return(-1);
+
+	}
+
+	return(fd);
+}
 
 
-
+int sendbytes(char * Buffer, int Count)
+/* Sendet Count Bytes aus dem Puffer Buffer */
+{
+	int sent;  /* return-Wert */
+	/*  Daten senden */
+	sent = write(fd, Buffer, Count);
+	if (sent < 0)
+	{
+		perror("sendbytes failed - error!");
+		return -1;
+	}
+	if (sent < Count)
+	{
+		perror("sendbytes failed - truncated!");
+	}
+	return sent;
+}
 
 void send_calc_ra(int received_globalCounter)
 {
@@ -328,10 +404,10 @@ void send_calc_ra(int received_globalCounter)
 	fprintf(stderr, "revol_count=%d\n",revol_count);
         map_addr->ra=(unsigned int)ra_to_send;
 
-		fprintf(stdout,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
-		sprintf(t_tele_p,"%X,%X#", map_addr->ra ,map_addr->dec);
+		fprintf(stderr,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
+		sprintf(t_tele_p,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
 
-
+	sendbytes(t_tele_p, strlen(t_tele_p));
 }
 
 void send_calc_dec(int received_globalCounter)
@@ -362,8 +438,9 @@ void send_calc_dec(int received_globalCounter)
 	fprintf(stderr, "revol_count=%d\n",revol_count);
         map_addr->dec=(unsigned int)dec_to_send;
 
-		fprintf(stdout,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
-		sprintf(t_tele_p,"%X,%X#", map_addr->ra ,map_addr->dec);
+		fprintf(stderr,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
+		sprintf(t_tele_p,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
 
+	sendbytes(t_tele_p, strlen(t_tele_p));
 }
 
