@@ -31,33 +31,38 @@ my $serial=$devices[1];
 my $cmd_line="cat $serial";
 
 $sock = new IO::Socket::INET(LocalPort => MYPORT,
+                             Type      => SOCK_STREAM,
 		             Reuse     => 1,
 		             Listen    => 5)
     or die "can't create local socket: $@\n";
 print "Accepting connections on Port ", MYPORT, "...\n";
 
+open(IN,"$cmd_line|") or die "could not start $cmd_line: $!";
+
 while ($client = $sock->accept()) 
   {
    print "Accepted connection from ",
    $client->peerhost(), ":", $client->peerport(), "\n";
+   my $line;
 
-
-open(IN,"$cmd_line|") or die "could not start $cmd_line: $!";
-
-
-
-foreach   my $line  (<IN>)
-{
-
+#   foreach   my $line  (<IN>)
+#   {
+      while(1){
+      #   sleep(3);    
+         $line=<IN>; 
         print "tty line $line\n";
-         my $out_calc=ra_dec_time($line);
+        my $out_calc=ra_dec_time($line);
+        chomp;   
     	print $client $out_calc;
+       }
+#   } 
 } 
- 
+   
+
+
    
   
     $client->close() if defined $client;
-}   
 
 sub ra_dec_time()
 {
@@ -69,7 +74,7 @@ sub ra_dec_time()
    my @ra_dec=split(',',$ra_dec_inp);
    
    my $ra = unpack("L",$ra_dec[0]);   
-   my $dec= unpack("l",$ra_dec[1]);
+   my $dec= unpack("L",$ra_dec[1]);
 
    my $status=0;
 
