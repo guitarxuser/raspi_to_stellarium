@@ -64,11 +64,13 @@ sub ra_dec_time()
    my $length=24;
    my $type=0;
    my $time= time();
-   my $ra =0xBAAAAB00;
+#   my $ra =0xBAAAAB00;
    my $ra_dec_inp = shift(@_);
-   my @ra_dec==split(',',$ra_dec_inp);
-#   my $ra = $ra_dec[0];
-   my $dec= $ra_dec[1];
+   my @ra_dec=split(',',$ra_dec_inp);
+   
+   my $ra = unpack("L",$ra_dec[0]);   
+   my $dec= unpack("l",$ra_dec[1]);
+
    my $status=0;
 
    my $out=pack("SSQLll",$length,$type,$time,$ra,$dec,$status);
