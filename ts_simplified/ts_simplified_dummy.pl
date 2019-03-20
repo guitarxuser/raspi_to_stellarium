@@ -38,6 +38,7 @@
 
 use strict;
 use IO::Socket;
+use Time::HiRes qw (sleep);
 #use Time::Local;
 use constant MYPORT => 10000;
 my $sock = '';
@@ -47,6 +48,7 @@ my $MAX_NUMBER=4294967296;
 my $globalCounter=0;
 
 $sock = new IO::Socket::INET(LocalPort => MYPORT,
+			     Type      => SOCK_STREAM,
 		             Reuse     => 1,
 		             Listen    => 5)
     or die "can't create local socket: $@\n";
@@ -58,7 +60,7 @@ while ($client = $sock->accept())
    $client->peerhost(), ":", $client->peerport(), "\n";  
    while (1) 
    {
-#    sleep(1);
+    sleep(0.05);
     
    #calculate ra
    

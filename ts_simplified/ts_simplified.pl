@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 use strict;
 use IO::Socket;
+use Time::HiRes qw (sleep);
 #use Time::Local;
 use constant MYPORT => 10000;
 my $sock = '';
@@ -48,8 +49,8 @@ while ($client = $sock->accept())
 #   foreach   my $line  (<IN>)
 #   {
       while(1){
-      #   sleep(3);    
-         $line=<IN>; 
+        sleep(0.05);  
+        $line=<IN>; 
         print "tty line $line\n";
         my $out_calc=ra_dec_time($line);
         chomp;   
