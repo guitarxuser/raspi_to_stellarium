@@ -49,7 +49,7 @@ while ($client = $sock->accept())
 #   foreach   my $line  (<IN>)
 #   {
       while(1){
-        sleep(0.05);  
+#        sleep(0.05);  
         $line=<IN>; 
         print "tty line $line\n";
         my $out_calc=ra_dec_time($line);
@@ -73,9 +73,9 @@ sub ra_dec_time()
 #   my $ra =0xBAAAAB00;
    my $ra_dec_inp = shift(@_);
    my @ra_dec=split(',',$ra_dec_inp);
-   
-   my $ra = unpack("L",$ra_dec[0]);   
-   my $dec= unpack("L",$ra_dec[1]);
+   my $ra = hex("$ra_dec[0]");
+   my $dec= hex("$ra_dec[1]"); 
+#   my $dec=543621760;
 
    my $status=0;
 
