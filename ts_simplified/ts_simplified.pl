@@ -38,7 +38,8 @@ $sock = new IO::Socket::INET(LocalPort => MYPORT,
     or die "can't create local socket: $@\n";
 print "Accepting connections on Port ", MYPORT, "...\n";
 
-open(IN,"$cmd_line|") or die "could not start $cmd_line: $!";
+#open(IN,"$cmd_line|") or die "could not start $cmd_line: $!";
+open (my $tty, $serial)  or die $!;
 
 while ($client = $sock->accept()) 
   {
@@ -50,7 +51,7 @@ while ($client = $sock->accept())
 #   {
       while(1){
 #        sleep(0.05);  
-        $line=<IN>; 
+        $line=<$tty>; 
         print "tty line $line\n";
         my $out_calc=ra_dec_time($line);
         chomp;   
