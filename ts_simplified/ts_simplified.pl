@@ -10,6 +10,10 @@ my $REVOL_STEPS_COUNT=256;
 my $MAX_NUMBER=4294967296;
 my $globalCounter=0;
 my @devices;
+my $ra_last;
+my $dec_last;
+my $ra_changed="true";
+    
 #---------------------------------------------------------------------
 #        start processing
 #---------------------------------------------------------------------
@@ -47,18 +51,34 @@ while ($client = $sock->accept())
    $client->peerhost(), ":", $client->peerport(), "\n";
    my $line;
 
-#   foreach   my $line  (<IN>)
-#   {
+
       while(1){
 #        sleep(0.05);  
         $line=<$tty>; 
         print "tty line $line\n";
         my $out_calc=ra_dec_time($line);
-        chomp;   
-    	print $client $out_calc;
-       }
-#   } 
-} 
+	my @out_calc_unpacked=unpack('SSQLll',$out_calc);
+	my $ra_to_send=$out_calc_unpacked[3];
+        my $dec_to_send=$out_calc_unpacked[4];
+
+	if($ra_last == $ra_to_send)
+         {
+           $ra_changed="true";
+         }
+        else
+        {
+         $ra_changed="false";
+        }
+	
+	$ra_last=$ra_to_send;
+	$dec_last=$dec_to_send;	
+        chomp;
+	if($ra_changed=="true")
+	{
+	    print $client $out_calc;
+	}
+      }
+  }
    
 
 
