@@ -13,7 +13,7 @@ my @devices;
 my $ra_last;
 my $dec_last;
 my $ra_changed="true";
-    
+my $dec_changed="true";    
 #---------------------------------------------------------------------
 #        start processing
 #---------------------------------------------------------------------
@@ -52,8 +52,9 @@ while ($client = $sock->accept())
    my $line;
 
 
-      while(1){
-#        sleep(0.05);  
+      while(1)
+      {
+        sleep(0.02);  
         $line=<$tty>; 
         print "tty line $line\n";
         my $out_calc=ra_dec_time($line);
@@ -66,18 +67,31 @@ while ($client = $sock->accept())
            $ra_changed="true";
          }
         else
+         {
+           $ra_changed="false";
+         }
+
+	if($dec_last == $dec_to_send)
+         {
+           $dec_changed="true";
+         }
+        else
         {
-         $ra_changed="false";
+         $dec_changed="false";
         }
 	
 	$ra_last=$ra_to_send;
 	$dec_last=$dec_to_send;	
+
         chomp;
-	if($ra_changed=="true")
-	{
+	if(($ra_changed=="true") or ($dec_changed=="true") )
+	{  
+          for (my $i=0; $i<2; $i++)
+	    {
 	    print $client $out_calc;
+	    }
 	}
-      }
+     }
   }
    
 

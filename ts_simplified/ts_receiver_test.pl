@@ -47,10 +47,13 @@ while ($client = $sock->accept())
    my $ra_hex=sprintf("%08X",$ra);
    my $dec_hex=sprintf("%08X",$dec);
    print "ra=$ra         dec=$dec\n";
-   print "ra=$ra_hex           dec=$dec_hex\n";
-     my $out_calc=ra_dec_time($ra,$dec);  
-   print $client $out_calc;
-   }
+   print "ra=$ra_hex          dec=$dec_hex\n";
+   my $out_calc=ra_dec_time($ra,$dec); 
+   for (my $i=0; $i<2; $i++)
+     { 
+       print $client $out_calc;
+     }
+    }
   }      
   
     $client->close() if defined $client;
