@@ -49,7 +49,7 @@ while ($client = $sock->accept())
    print "ra=$ra         dec=$dec\n";
    print "ra=$ra_hex          dec=$dec_hex\n";
    my $out_calc=ra_dec_time($ra,$dec); 
-   for (my $i=0; $i<2; $i++)
+   for (my $i=0; $i<5; $i++)
      { 
        print $client $out_calc;
      }
