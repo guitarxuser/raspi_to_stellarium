@@ -1,0 +1,28 @@
+                 How to drive the simplified perl version of telescope server
+                 on a pc (win/linux) or raspberrypi
+                 
+                 Install as first the telescope plugin on Stellarium
+                 and configure control with extern software on port 10000
+                 
+                 1. To run a dummy server put on the cmd line:
+                 
+                    perl ts_simplified_dummy.pl
+                    to stop push ctrl + c
+                 
+                 2. To test the communication between Stellarium and the server
+                    the coordinates are sended by mouse click on the sky and
+                    pushing (ctrl + 1) keys,
+                    run the receiver test on cmd line with:
+                 
+                    perl ts_receiver_test.pl
+                    to stop push ctrl + c
+                    
+                 3. This step works just on raspberrypi with gpio hardware.
+                    To start the ts_simpified.pl server go to the scripts 
+                    directory an runs the script
+                 
+                    sh start_ts_simplified.sh
+                    to stop the server open second xterm session and
+                    go to scripts and put the command:
+                    
+                    sh stop_telescope.sh
