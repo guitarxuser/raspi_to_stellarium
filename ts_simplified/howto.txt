@@ -19,7 +19,7 @@
                     
                  3. This step works just on raspberrypi with gpio hardware.
                     To start the ts_simpified.pl server go to the scripts 
-                    directory an runs the script
+                    directory an run the script
                  
                     sh start_ts_simplified.sh
                     to stop the server open second xterm session and
