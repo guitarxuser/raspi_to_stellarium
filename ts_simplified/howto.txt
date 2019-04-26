@@ -11,7 +11,7 @@
                  
                  2. To test the communication between Stellarium and the server
                     the coordinates are sended by mouse click on the sky and
-                    pushing (ctrl + 1) keys,
+                    pushing (ctrl + 1) or (ctrl + 2) keys,
                     run the receiver test on cmd line with:
                  
                     perl ts_receiver_test.pl
