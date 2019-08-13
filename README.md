@@ -12,7 +12,7 @@ Prerequisites:
 
    install wiringPi:
 
-   git clone git://git.drogon.net/wiringPi
+    git clone https://github.com/WiringPi/WiringPi.git
 
    cd wiringPi
 
