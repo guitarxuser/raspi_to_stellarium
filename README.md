@@ -20,6 +20,8 @@ Prerequisites:
 
    Download raspi_to_stellarium and go to the main directory:
    
+   git clone https://github.com/guitarxuser/raspi_to_stellarium.git
+   
    cd raspi_to_stellarium
 
    To setup and execute do following steps:
