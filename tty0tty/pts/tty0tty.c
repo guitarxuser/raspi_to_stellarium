@@ -212,10 +212,14 @@ int main(int argc, char* argv[])
     {
       copydata(fd1, fd2);
     }
+    /*do not copy control data from telescope to raspi*/ 
+    /*
     if (FD_ISSET(fd2, &rfds))
     {
       copydata(fd2, fd1);
     }
+    */
+        usleep(1000);
   }
 
   close(fd1);
