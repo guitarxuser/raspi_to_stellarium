@@ -24,6 +24,8 @@
 #define  RoAPin    0 /* gpio pin 11*/
 #define  RoBPin    1 /* gpio pin 12 outside*/
 #define  RoSPin    2 
+#define  RoCPin    3 /* gpio pin 15*/
+#define  RoDPin    4 /* gpio pin 16 outside*/
 #define  high  1
 #define  low   0
 #define  MAX_NUMBER 4294967296 /*maximal RA  2^32*/
@@ -83,7 +85,7 @@ struct stellarium_protocol{
 
 
 
-void rotaryDeal_dummy(void)
+void rotaryDeal_dummy_ra(void)
 {
 
 	char  telsscope_telegram [18]; /*8char;8char#*/
@@ -107,8 +109,51 @@ void rotaryDeal_dummy(void)
 		}
 		else
 		{
-		fprintf(stderr,"%X,%s#\n",(unsigned int)ra_to_send,"20670280");
-		sprintf(t_tele_p,"%X,%s#",(unsigned int)ra_to_send,"20670280");
+		  /*  fprintf(stderr,"%X,%s#\n",(unsigned int)ra_to_send,"20670280");
+		      sprintf(t_tele_p,"%X,%s#",(unsigned int)ra_to_send,"20670280");*/
+		  fprintf(stderr,"%X,%s#\n",(unsigned int)ra_to_send,"20670280");
+		  sprintf(t_tele_p,"%X,%s#",(unsigned int)ra_to_send,"20670280");
+
+		}
+		sleep(1);
+		sendbytes(t_tele_p, strlen(t_tele_p));
+		globalCounter = globalCounter + 1;
+
+		 if (globalCounter ==  REVOL_STEPS_COUNT)
+			{
+				globalCounter=0;
+				//	sleep(1);
+			}
+
+}
+
+void rotaryDeal_dummy_dec(void)
+{
+
+	char  telsscope_telegram [18]; /*8char;8char#*/
+	char* t_tele_p;
+	float dec_to_send=0;
+
+	t_tele_p=telsscope_telegram;
+
+
+
+		dec_to_send=((float)globalCounter/(float)REVOL_STEPS_COUNT)*MAX_NUMBER;
+
+		fprintf(stderr, "globalCounter=%d\n",globalCounter);
+		/* sprintf(t_tele_p,"%s","64AB0500,40CE0500#");*/
+		/*fprintf(stderr,"%X,%s#\n",(int)ra_to_send,"40CE0500");
+                sprintf(t_tele_p,"%X,%s#",(int)ra_to_send,"40CE0500");*/
+		if(dec_to_send ==0)
+		{
+		    fprintf(stderr,"%s,%s#\n","50000000","20670280");
+		    sprintf(t_tele_p,"%s,%s#","50000000","20670280");
+		}
+		else
+		{
+		  fprintf(stderr,"%s,%X#\n","50000000",(unsigned int)dec_to_send);
+		  sprintf(t_tele_p,"%s,%X#","50000000",(unsigned int)dec_to_send);
+
 		}
 		sleep(1);
 		sendbytes(t_tele_p, strlen(t_tele_p));
@@ -121,6 +166,7 @@ void rotaryDeal_dummy(void)
 			}
 
 }
+
 
 void rotaryClear(void)
 {
@@ -153,7 +199,8 @@ int main(int argc, char* argv[])
 	
         while(1){
 	 
-	 rotaryDeal_dummy(); /*dummy simulation of rotatory encoder*/
+	  rotaryDeal_dummy_ra(); /*dummy simulation of rotatory encoder ra*/
+	  //rotaryDeal_dummy_dec(); /*dec*/
 	 /*rotaryDeal();*/		
 	  /*rotaryClear();*/
 	}
