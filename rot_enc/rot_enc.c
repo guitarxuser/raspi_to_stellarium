@@ -23,11 +23,12 @@
 #define  high  1
 #define  low   0
 #define  MAX_NUMBER 4294967296 /*maximal RA  2^32*/
-#define  REVOL_STEPS_COUNT 24  /*encoder steps for 360 degree revolution*/
+#define  REVOL_STEPS_COUNT_RA 600   /*encoder ra steps for 360 degree revolution*/
+#define  REVOL_STEPS_COUNT_DEC 96  /*encoder dec steps for 360 degree revolution*/
 #define gpio_MAXBUF 100
 #define	SIZE		sizeof(long)	/* size of shared memory area */
-static volatile int globalCounter = 0 ;
-static volatile int globalCounter_dec = 0;
+static volatile int globalCounter=12;
+static volatile int globalCounter_dec=24; /*polaris declination*/
 static unsigned char flag_ra=high;
 static unsigned char flag_dec=high;
 unsigned char Last_RoB_Status;
@@ -62,9 +63,6 @@ void rotaryDeal_ra(void);
 void rotaryDeal_dec(void);
 void rotaryDeal_polaris_ra(void);
 
-//static volatile float ra_to_send = 0;
-//static volatile float dec_to_send = 0;
-
 
 /***********************  main  *******************************/
 
@@ -73,7 +71,6 @@ int main(int argc, char* argv[])
 
 	 char* device=argv[1];
 	 int	fd_zero;
-         int i=0;
          pid_t  pid;
 	 void	*area;
 
@@ -103,11 +100,6 @@ int main(int argc, char* argv[])
 	pullUpDnControl(RoBPin, PUD_UP);
 	pullUpDnControl(RoCPin, PUD_UP);
 	pullUpDnControl(RoDPin, PUD_UP);
-	     while(i < 10)
-	     {
-              rotaryDeal_polaris_ra();
-	      i++;
-	     }
 
 	/* parent child game*/
 
@@ -260,42 +252,7 @@ void rotaryDeal_dec(void)
 
 }
 
-void rotaryDeal_polaris_ra(void)
-{
 
-	char  telsscope_telegram [18]; /*8char;8char#*/
-	char* t_tele_p;
-	float ra_to_send=0;
-
-	t_tele_p=telsscope_telegram;
-
-
-
-		ra_to_send=((float)globalCounter/(float)REVOL_STEPS_COUNT)*MAX_NUMBER;
-
-		fprintf(stderr, "globalCounter=%d\n",globalCounter);
-		if(ra_to_send ==0)
-		{
-		    fprintf(stderr,"%s,%s#\n","00000000","40000000");
-		    sprintf(t_tele_p,"%s,%s#","00000000","40000000");
-		}
-		else
-		{
-		  fprintf(stderr,"%X,%s#\n",(unsigned int)ra_to_send,"40000000");
-		  sprintf(t_tele_p,"%X,%s#",(unsigned int)ra_to_send,"40000000");
-
-		}
-		sleep(1);
-		sendbytes(t_tele_p, strlen(t_tele_p));
-		globalCounter = globalCounter + 1;
-
-		 if (globalCounter ==  REVOL_STEPS_COUNT)
-			{
-				globalCounter=0;
-				sleep(1);
-			}
-
-}
 
 
 int my_delay(unsigned long mikros)
@@ -387,21 +344,21 @@ void send_calc_ra(int received_globalCounter)
 	t_tele_p=telsscope_telegram;
 	internal_counter=received_globalCounter;
 
-	revol_count= abs((int)(floor((float)received_globalCounter/REVOL_STEPS_COUNT)));
+	revol_count= abs((int)(floor((float)received_globalCounter/REVOL_STEPS_COUNT_RA)));
 
-	if(received_globalCounter >= REVOL_STEPS_COUNT)
+	if(received_globalCounter >= REVOL_STEPS_COUNT_RA)
 	{
-		internal_counter=received_globalCounter - REVOL_STEPS_COUNT*revol_count;
+		internal_counter=received_globalCounter - REVOL_STEPS_COUNT_RA*revol_count;
 	}
 
 	if(received_globalCounter < 0)
 	{
-		internal_counter=received_globalCounter + REVOL_STEPS_COUNT*revol_count ;
+		internal_counter=received_globalCounter + REVOL_STEPS_COUNT_RA*revol_count ;
 	}
-	ra_to_send=((float)internal_counter/(float)REVOL_STEPS_COUNT)*MAX_NUMBER;
-	fprintf(stderr, "received_globalCounter=%d\n",received_globalCounter);
+	ra_to_send=((float)internal_counter/(float)REVOL_STEPS_COUNT_RA)*MAX_NUMBER;
+	/*	fprintf(stderr, "RA received_globalCounter=%d\n",received_globalCounter);
 	fprintf(stderr, "internal_counter=%d\n",internal_counter);
-	fprintf(stderr, "revol_count=%d\n",revol_count);
+	fprintf(stderr, "revol_count=%d\n",revol_count);*/
         map_addr->ra=(unsigned int)ra_to_send;
 
 		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
@@ -421,19 +378,19 @@ void send_calc_dec(int received_globalCounter)
 	t_tele_p=telsscope_telegram;
 	internal_counter=received_globalCounter;
 
-	revol_count= abs((int)(floor((float)received_globalCounter/REVOL_STEPS_COUNT)));
+	revol_count= abs((int)(floor((float)received_globalCounter/REVOL_STEPS_COUNT_DEC)));
 
-	if(received_globalCounter >= REVOL_STEPS_COUNT)
+	if(received_globalCounter >= REVOL_STEPS_COUNT_DEC)
 	{
-		internal_counter=received_globalCounter - REVOL_STEPS_COUNT*revol_count;
+		internal_counter=received_globalCounter - REVOL_STEPS_COUNT_DEC*revol_count;
 	}
 
 	if(received_globalCounter < 0)
 	{
-		internal_counter=received_globalCounter + REVOL_STEPS_COUNT*revol_count ;
+		internal_counter=received_globalCounter + REVOL_STEPS_COUNT_DEC*revol_count ;
 	}
-	dec_to_send=((float)internal_counter/(float)REVOL_STEPS_COUNT)*MAX_NUMBER;
-		fprintf(stderr, "received_globalCounter=%d\n",received_globalCounter);
+	dec_to_send=((float)internal_counter/(float)REVOL_STEPS_COUNT_DEC)*MAX_NUMBER;
+	fprintf(stderr, "DEC received_globalCounter=%d\n",received_globalCounter);
 	fprintf(stderr, "internal_counter=%d\n",internal_counter);
 	fprintf(stderr, "revol_count=%d\n",revol_count);
         map_addr->dec=(unsigned int)dec_to_send;
