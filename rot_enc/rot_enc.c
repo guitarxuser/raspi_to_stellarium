@@ -23,7 +23,7 @@
 #define  high  1
 #define  low   0
 #define  MAX_NUMBER 4294967296 /*maximal RA  2^32*/
-#define  REVOL_STEPS_COUNT_RA 600   /*encoder ra steps for 360 degree revolution*/
+#define  REVOL_STEPS_COUNT_RA 600 /*Encoder ra steps for 360 degree revolution*/
 #define  REVOL_STEPS_COUNT_DEC 96  /*encoder dec steps for 360 degree revolution*/
 #define gpio_MAXBUF 100
 #define	SIZE		sizeof(long)	/* size of shared memory area */
@@ -42,7 +42,8 @@ unsigned char Current_RoC_Status;
 int fd;
 struct timeval t1, t2;
 long long t;
-unsigned long microseconds = 5000;
+unsigned long microseconds_ra = 500;
+unsigned long microseconds_dec = 5000;
 
 typedef struct{
 	unsigned int ra;
@@ -161,7 +162,7 @@ void rotaryDeal_ra(void)
 	Last_RoA_Status = digitalRead(RoAPin);
 	gettimeofday(&t1, NULL);
 	while(digitalRead(RoAPin)){
-		my_delay(microseconds);
+		my_delay(microseconds_ra);
 		Current_RoB_Status = digitalRead(RoBPin);
 		flag_ra = 1;
 	}
@@ -210,7 +211,7 @@ void rotaryDeal_dec(void)
 	Last_RoC_Status = digitalRead(RoCPin);
 
 	while(digitalRead(RoCPin)){
-		my_delay(microseconds);
+		my_delay(microseconds_dec);
 		Current_RoD_Status = digitalRead(RoDPin);
 		flag_dec = 1;
 		//my_delay(500);
@@ -356,7 +357,7 @@ void send_calc_ra(int received_globalCounter)
 		internal_counter=received_globalCounter + REVOL_STEPS_COUNT_RA*revol_count ;
 	}
 	ra_to_send=((float)internal_counter/(float)REVOL_STEPS_COUNT_RA)*MAX_NUMBER;
-	/*	fprintf(stderr, "RA received_globalCounter=%d\n",received_globalCounter);
+	/*		fprintf(stderr, "RA received_globalCounter=%d\n",received_globalCounter);
 	fprintf(stderr, "internal_counter=%d\n",internal_counter);
 	fprintf(stderr, "revol_count=%d\n",revol_count);*/
         map_addr->ra=(unsigned int)ra_to_send;
@@ -390,9 +391,10 @@ void send_calc_dec(int received_globalCounter)
 		internal_counter=received_globalCounter + REVOL_STEPS_COUNT_DEC*revol_count ;
 	}
 	dec_to_send=((float)internal_counter/(float)REVOL_STEPS_COUNT_DEC)*MAX_NUMBER;
+	/*
 	fprintf(stderr, "DEC received_globalCounter=%d\n",received_globalCounter);
 	fprintf(stderr, "internal_counter=%d\n",internal_counter);
-	fprintf(stderr, "revol_count=%d\n",revol_count);
+	fprintf(stderr, "revol_count=%d\n",revol_count);*/
         map_addr->dec=(unsigned int)dec_to_send;
 
 		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
