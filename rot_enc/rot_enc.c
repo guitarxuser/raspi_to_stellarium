@@ -171,7 +171,7 @@ void rotaryDeal_ra(void)
 	if(flag_ra == 1){
 		flag_ra = 0;
 		if((Last_RoB_Status == 1)&&(Current_RoB_Status == 0) ){
-			globalCounter = globalCounter - 1;
+			globalCounter = globalCounter + 1;
 			/*
 	printf("clockw Last_RoB_Status : %d\n",Last_RoB_Status);
 	printf("clockw Current_RoB_Status : %d\n",Current_RoB_Status);
@@ -188,7 +188,7 @@ void rotaryDeal_ra(void)
 
 		if((Last_RoB_Status == 0)&&(Current_RoB_Status == 1)){
 
-			globalCounter = globalCounter + 1 ;
+			globalCounter = globalCounter - 1 ;
 			/*
 	printf("anti Last_RoB_Status : %d\n",Last_RoB_Status);
 	printf("anti Current_RoB_Status : %d\n",Current_RoB_Status);
@@ -221,7 +221,7 @@ void rotaryDeal_dec(void)
 	if(flag_dec == 1){
 		flag_dec = 0;
 		if((Last_RoD_Status == 1)&&(Current_RoD_Status == 0) ){
-			globalCounter_dec = globalCounter_dec - 1;
+			globalCounter_dec = globalCounter_dec + 1;
 			/*
 	printf("clockw Last_RoB_Status : %d\n",Last_RoB_Status);
 	printf("clockw Current_RoB_Status : %d\n",Current_RoB_Status);
@@ -237,7 +237,7 @@ void rotaryDeal_dec(void)
 
 		if((Last_RoD_Status == 0)&&(Current_RoD_Status == 1)){
 
-			globalCounter_dec = globalCounter_dec + 1 ;
+			globalCounter_dec = globalCounter_dec - 1 ;
 			/*
 	printf("anti Last_RoB_Status : %d\n",Last_RoB_Status);
 	printf("anti Current_RoB_Status : %d\n",Current_RoB_Status);
