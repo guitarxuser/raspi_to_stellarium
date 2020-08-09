@@ -67,7 +67,8 @@ while ($client = $sock->accept())
     my $ra_calc=($globalCounter/$REVOL_STEPS_COUNT)*$MAX_NUMBER;
        $ra_calc= sprintf("%08d", $ra_calc);
        print("counter is $globalCounter $ra_calc\n");
-    my $out_calc=ra_dec_time($ra_calc);   
+    my $out_calc=ra_dec_time($ra_calc);
+   #    $out_calc=$out_calc."0000";    
        chomp;
        print $client $out_calc;
        $globalCounter++;
@@ -89,6 +90,7 @@ sub ra_dec_time()
    my $ra = $ra_inp;
    my $dec=0x20670280;
    my $status=0;
+   my $filer=0;
 
    my $out=pack("SSQLll",$length,$type,$time,$ra,$dec,$status);
    my @out_unpacked=unpack('SSQLll',$out);
@@ -98,6 +100,8 @@ sub ra_dec_time()
    $ra=$out_unpacked[3];
    $dec=$out_unpacked[4];
    $status=$out_unpacked[5];
+  # $filer=$out_unpacked[6];
+
    my $out_unpacked=$length.$type.$time.$ra.$dec.$status;
    print("time=$time    ra=$ra    dec=$dec\n");
    print "$out_unpacked\n";
