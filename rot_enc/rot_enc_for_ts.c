@@ -276,13 +276,13 @@ void rotaryDeal_polaris_ra(void)
 		fprintf(stderr, "globalCounter=%d\n",globalCounter);
 		if(ra_to_send ==0)
 		{
-		    fprintf(stderr,"%s,%s\r\n","00000000","40000000");
-		    sprintf(t_tele_p,"%s,%s\r\n","00000000","40000000");
+		    fprintf(stderr,"%d,%d\r\n",0x00000000,0x40000000);
+		    sprintf(t_tele_p,"%d,%d\r\n",0x00000000,0x40000000);
 		}
 		else
 		{
-		  fprintf(stderr,"%X,%s\r\n",(unsigned int)ra_to_send,"40000000");
-		  sprintf(t_tele_p,"%X,%s\r\n",(unsigned int)ra_to_send,"40000000");
+		  fprintf(stderr,"%d,%d\r\n",(unsigned int)ra_to_send,0x40000000);
+		  sprintf(t_tele_p,"%d,%d\r\n",(unsigned int)ra_to_send,0x40000000);
 
 		}
 		sleep(1);
@@ -404,8 +404,8 @@ void send_calc_ra(int received_globalCounter)
 	fprintf(stderr, "revol_count=%d\n",revol_count);
         map_addr->ra=(unsigned int)ra_to_send;
 
-		fprintf(stderr,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
-		sprintf(t_tele_p,"%X,%X\r\n", map_addr->ra ,map_addr->dec);
+		fprintf(stderr,"%d,%d\r\n", map_addr->ra ,map_addr->dec);
+		sprintf(t_tele_p,"%d,%d\r\n", map_addr->ra ,map_addr->dec);
 
 	sendbytes(t_tele_p, strlen(t_tele_p));
 }
