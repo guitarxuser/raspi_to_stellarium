@@ -361,9 +361,9 @@ void send_calc_ra(int received_globalCounter)
 	fprintf(stderr, "internal_counter=%d\n",internal_counter);
 	fprintf(stderr, "revol_count=%d\n",revol_count);*/
         map_addr->ra=(unsigned int)ra_to_send;
-
+            
 		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
-		sprintf(t_tele_p,"%X,%X#", map_addr->ra ,map_addr->dec);
+		sprintf(t_tele_p,"%X,%X#\n", map_addr->ra ,map_addr->dec);
 
 	sendbytes(t_tele_p, strlen(t_tele_p));
 }
@@ -398,7 +398,7 @@ void send_calc_dec(int received_globalCounter)
         map_addr->dec=(unsigned int)dec_to_send;
 
 		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
-		sprintf(t_tele_p,"%X,%X#", map_addr->ra ,map_addr->dec);
+		sprintf(t_tele_p,"%X,%X#\n", map_addr->ra ,map_addr->dec);
 
 	sendbytes(t_tele_p, strlen(t_tele_p));
 }
