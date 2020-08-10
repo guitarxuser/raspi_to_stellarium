@@ -130,7 +130,9 @@ copydata(int fdfrom, int fdto)
     {
       do
       {
+        tcflush(fdto,TCIOFLUSH);              /* empty buffer */
         bw = write(fdto, pbuf, br);
+
         if (bw > 0)
         {
           pbuf += bw;
@@ -201,18 +203,21 @@ int main(int argc, char* argv[])
     FD_ZERO(&rfds);
     FD_SET(fd1, &rfds);
     FD_SET(fd2, &rfds);
-
+   
     retval = select(fd2 + 1, &rfds, NULL, NULL, NULL);
     if (retval == -1)
     {
       perror("select");
       return 1;
     }
-    /*
+    
     if (FD_ISSET(fd1, &rfds))
     {
       copydata(fd1, fd2);
-    }*/
+    }
+
+    //  tcflush(fd2, TCIFLUSH);
+
     /*do not copy control data from telescope to raspi*/ 
     /*
     if (FD_ISSET(fd2, &rfds))
