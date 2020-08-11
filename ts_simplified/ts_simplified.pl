@@ -33,8 +33,6 @@ close(LOGFILE);
 #synchronisation
 my $serial=$devices[1];
 
-my $cmd_line="cat $serial";
-
 $sock = new IO::Socket::INET(LocalPort => MYPORT,
                              Type      => SOCK_STREAM,
 		             Reuse     => 1,
@@ -54,43 +52,13 @@ while ($client = $sock->accept())
 
       while(1)
       {
-        sleep(0.02);  
+#        sleep(0.02);  
         $line=<$tty>; 
         print "tty line $line\n";
         my $out_calc=ra_dec_time($line);
-	my @out_calc_unpacked=unpack('SSQLll',$out_calc);
-	my $ra_to_send=$out_calc_unpacked[3];
-        my $dec_to_send=$out_calc_unpacked[4];
+#        sleep(0.5); 
+        print $client $out_calc;
 
-	if($ra_last == $ra_to_send)
-         {
-           $ra_changed="true";
-         }
-        else
-         {
-           $ra_changed="false";
-         }
-
-	if($dec_last == $dec_to_send)
-         {
-           $dec_changed="true";
-         }
-        else
-        {
-         $dec_changed="false";
-        }
-	
-	$ra_last=$ra_to_send;
-	$dec_last=$dec_to_send;	
-
-        chomp;
-	if(($ra_changed=="true") or ($dec_changed=="true") )
-	{  
-          for (my $i=0; $i<2; $i++)
-	    {
-	    print $client $out_calc;
-	    }
-	}
      }
   }
    

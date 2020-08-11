@@ -160,7 +160,7 @@ void rotaryDeal_ra(void)
 
 	Last_RoB_Status = digitalRead(RoBPin);
 	Last_RoA_Status = digitalRead(RoAPin);
-	gettimeofday(&t1, NULL);
+	//	gettimeofday(&t1, NULL);
 	while(digitalRead(RoAPin)){
 		my_delay(microseconds_ra);
 		Current_RoB_Status = digitalRead(RoBPin);
@@ -362,9 +362,9 @@ void send_calc_ra(int received_globalCounter)
 	fprintf(stderr, "revol_count=%d\n",revol_count);*/
         map_addr->ra=(unsigned int)ra_to_send;
             
-		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
+	//	fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
 		sprintf(t_tele_p,"%X,%X#\n", map_addr->ra ,map_addr->dec);
-
+	my_delay(5000);
 	sendbytes(t_tele_p, strlen(t_tele_p));
 }
 
@@ -397,9 +397,9 @@ void send_calc_dec(int received_globalCounter)
 	fprintf(stderr, "revol_count=%d\n",revol_count);*/
         map_addr->dec=(unsigned int)dec_to_send;
 
-		fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
+	//	fprintf(stderr,"%X,%X#\n", map_addr->ra ,map_addr->dec);
 		sprintf(t_tele_p,"%X,%X#\n", map_addr->ra ,map_addr->dec);
-
+	my_delay(5000);
 	sendbytes(t_tele_p, strlen(t_tele_p));
 }
 
